@@ -3,9 +3,14 @@ import express from "express";                    // web server
 import bcrypt from "bcrypt";                      // password hashing
 import { inspectPassword } from "password-inspector"; // password strength checker
 import fs from "fs";                              // read/write files
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ===== 2. SETTINGS =====
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const USERS_FILE = "data/users.json"; // where users are saved
 const MIN_SCORE = 40;                 // minimum password score to register
 const SALT_ROUNDS = 12;               // how slow/strong the bcrypt hash is
@@ -13,7 +18,14 @@ const SALT_ROUNDS = 12;               // how slow/strong the bcrypt hash is
 // ===== 3. SET UP THE SERVER =====
 const app = express();
 app.use(express.json());        // lets us read JSON sent from the page
-app.use(express.static("public")); // serves public/index.html
+
+if (fs.existsSync(path.join(__dirname, "public"))) {
+  app.use(express.static(path.join(__dirname, "public")));
+}
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
 // ===== 4. HELPER FUNCTIONS =====
 
